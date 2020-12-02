@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import DataTable from './components/datatable';
 function App() {
-  let model = {
+  let setup = {
       headers: [
         {
           title: "Profile", accessor: "profile", width: "80px", index: 1, cell: {
@@ -34,13 +34,35 @@ function App() {
         { id: 2, name: "b", age: 35, qualification: "B.Sc", rating: 5, profile: "https://assets.dryicons.com/uploads/icon/svg/5610/fff0263a-8f19-4b74-8f3d-fc24b9561a96.svg" },
         { id: 3, name: "c", age: 42, qualification: "B.E", rating: 3, profile: "https://assets.dryicons.com/uploads/icon/svg/5610/fff0263a-8f19-4b74-8f3d-fc24b9561a96.svg" },
       ]
-    }
+  }
+
+  const [state, setState] = React.useState(setup);
 
   const onUpdateTable = () => {
 
   }
+
+  const onAddRow = () => {
+    let id = +new Date();
+    var newRow = {
+      id: id,
+      name: "name " + id,
+      age: 34,
+      qualification: "Graduate",
+      rating: 4,
+      profile: "https://assets.dryicons.com/uploads/icon/svg/5578/a929b5f4-ccd8-43d9-b2bc-bc735aaa8617.svg"
+    };
+
+
+    setState({
+      ...state,
+      data: [newRow, ...state.data]
+    });
+  }
+
   return (
     <div className="App">
+       <button onClick={onAddRow}>Add random row</button>
        <DataTable className="data-table"
           title="USER PROFILES"
           keyField="id"
@@ -51,8 +73,8 @@ function App() {
             type: "long"  // long, short
           }}
           width="100%"
-          headers={model.headers}
-          data={model.data}
+          headers={state.headers}
+          data={state.data}
           noData="No records!"
           onUpdate={onUpdateTable} />
     </div>

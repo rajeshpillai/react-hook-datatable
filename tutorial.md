@@ -9,4 +9,5 @@
   - Add sort function
   - Add sort icons
 - Reorder header columns by drag and drop 
+- Add useEffect to capture props changes
 - Add search feature (todo)

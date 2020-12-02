@@ -10,6 +10,14 @@ function DataTable(props) {
     data: props.data,
     headers: props.headers
   });
+
+  // Update local state, when the parent changes the props of DataTable
+  React.useEffect(() => {
+    setData({
+      ...state,
+      data: props.data
+    })
+  },[props])
   
   let keyField = props.keyField || "id";
   let noData = props.noData || "No records found!";
