@@ -16,6 +16,14 @@ export default function Pagination(props) {
       ...state,
       ...props,
     });
+
+    //Added to change the current page back to 1 if current page does not exist due to change in pageLength
+    if (
+      currentPageInput.current &&
+      currentPageInput.current.value != props.currentPage
+    ) {
+      currentPageInput.current.value = props.currentPage;
+    }
   }, [props]);
 
   const onPageLengthChange = () => {
