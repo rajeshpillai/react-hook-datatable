@@ -35,10 +35,51 @@ function DataTable(props) {
     return headerView;
   }
 
+  const renderContent = () => {
+    let contentView = data.map((row, rowIdx) => {
+      let id = row[keyField];
+      let tds = headers.map((header, index) => {
+        let content = row[header.accessor];
+        let cell = header.cell;
+        if (cell) {
+          if (typeof(cell) === "object") {
+            if (cell.type === "image" && content) {
+              content = <img style={cell.style} src={content} />
+            }
+          } else if (typeof(cell) === "function") {
+            content = cell(content);
+          }
+        }
+        return (
+          <td key={index} data-id={id} data-row={rowIdx}>
+            {content}
+          </td>
+        )
+      });
+       return (
+        <tr>
+          {tds}
+        </tr>
+       );
+    });
+    return contentView;
+  }
+
+  const renderNoData = () => {
+    return (
+      <tr>
+        <td colSpan={headers.length}>
+            {noData}
+        </td>
+      </tr>
+    );
+  }
+
   const renderTable = () => {
     let title = props.title || "DataTable";
     let headerView = renderTableHeader();
-    let contentView = "Content goes here...";
+    let contentView = data.length > 0 
+            ? renderContent() : renderNoData();
 
     return (
       <table className="data-inner-table">
@@ -50,6 +91,9 @@ function DataTable(props) {
             {headerView}
           </tr>
         </thead>
+        <tbody>
+          {contentView}
+        </tbody>
       </table>
     )
   }

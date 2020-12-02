@@ -30,9 +30,9 @@ function App() {
         },
       ],
       data: [
-        { id: 1, name: "a", age: 29, qualification: "B.Com", rating: 3, profile: "https://png.icons8.com/nolan/50/000000/user.png" },
-        { id: 2, name: "b", age: 35, qualification: "B.Sc", rating: 5, profile: "https://png.icons8.com/nolan/50/000000/user.png" },
-        { id: 3, name: "c", age: 42, qualification: "B.E", rating: 3, profile: "https://png.icons8.com/nolan/50/000000/user.png" },
+        { id: 1, name: "a", age: 29, qualification: "B.Com", rating: 3, profile: "https://assets.dryicons.com/uploads/icon/svg/5610/fff0263a-8f19-4b74-8f3d-fc24b9561a96.svg" },
+        { id: 2, name: "b", age: 35, qualification: "B.Sc", rating: 5, profile: "https://assets.dryicons.com/uploads/icon/svg/5610/fff0263a-8f19-4b74-8f3d-fc24b9561a96.svg" },
+        { id: 3, name: "c", age: 42, qualification: "B.E", rating: 3, profile: "https://assets.dryicons.com/uploads/icon/svg/5610/fff0263a-8f19-4b74-8f3d-fc24b9561a96.svg" },
       ]
     }
 
