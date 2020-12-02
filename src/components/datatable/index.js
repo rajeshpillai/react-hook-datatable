@@ -29,6 +29,10 @@ function DataTable(props) {
       let cleanTitle = header.accessor;
       let width = header.width;
 
+      if (state.sortby === index) {
+        title += state.descending ? '\u2193' : '\u2191';
+      }
+
       return (
         <th key={cleanTitle} 
           style={{width: width}}
