@@ -8,3 +8,5 @@
 - Add sorting using table header column
   - Add sort function
   - Add sort icons
+- Reorder header columns by drag and drop 
+- Add search feature (todo)

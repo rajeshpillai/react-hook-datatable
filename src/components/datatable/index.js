@@ -7,24 +7,49 @@ function DataTable(props) {
   const [state, setData] = React.useState({
     sortby: null,
     descending: null,
-    data: props.data
+    data: props.data,
+    headers: props.headers
   });
-
-  const {headers} = props;
   
   let keyField = props.keyField || "id";
   let noData = props.noData || "No records found!";
   let width = props.width || "100%";
 
 
+  // Col drag and drop events
+  const onDragStart = (e, srcIndex) => {
+    e.dataTransfer.setData("text/plain", srcIndex);
+  }
+
+  const onDrop = (e, targetIndex) => {
+    e.preventDefault();
+    let source = e.dataTransfer.getData("text/plain");
+    let headers = [...state.headers];  // clone the header
+    let srcHeader = headers[source];
+    let targetHeader = headers[targetIndex];
+
+    let temp = srcHeader.index;
+    srcHeader.index = targetHeader.index;
+    targetHeader.index = temp;
+
+     setData({
+      data: [...state.data],
+      headers: state.headers
+    });
+  }
+
+  const onDragOver = (e) => {
+    e.preventDefault();
+  }
+
   const renderTableHeader = () => {
     // Sort header according to index
-    headers.sort((a, b) => {
+    state.headers.sort((a, b) => {
       if (a.index > b.index) return 1;
       return -1;
     });
 
-    let headerView = headers.map((header, index) => {
+    let headerView = state.headers.map((header, index) => {
       let title = header.title;
       let cleanTitle = header.accessor;
       let width = header.width;
@@ -37,8 +62,11 @@ function DataTable(props) {
         <th key={cleanTitle} 
           style={{width: width}}
           data-col = {cleanTitle}
+          onDragStart = {e => onDragStart(e, index)}
+          onDragOver = {onDragOver}
+          onDrop = {e => onDrop(e, index)}
         >
-          <span className="header-cell" data-col = {cleanTitle}>
+          <span draggable className="header-cell" data-col = {cleanTitle}>
             {title}
           </span>
         </th>
@@ -51,7 +79,7 @@ function DataTable(props) {
   const renderContent = () => {
     let contentView = state.data.map((row, rowIdx) => {
       let id = row[keyField];
-      let tds = headers.map((header, index) => {
+      let tds = state.headers.map((header, index) => {
         let content = row[header.accessor];
         let cell = header.cell;
         if (cell) {
@@ -81,7 +109,7 @@ function DataTable(props) {
   const renderNoData = () => {
     return (
       <tr>
-        <td colSpan={headers.length}>
+        <td colSpan={state.headers.length}>
             {noData}
         </td>
       </tr>
@@ -116,7 +144,8 @@ function DataTable(props) {
     setData({
       sortby: colIndex,
       descending,
-      data: dataCopy
+      data: dataCopy,
+      headers: [...state.headers]
     });
   }
 
