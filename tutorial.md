@@ -6,3 +6,5 @@
   - Handle Image type
   - Handle custom renderer (render prop)
 - Add sorting using table header column
+  - Add sort function
+  - Add sort icons

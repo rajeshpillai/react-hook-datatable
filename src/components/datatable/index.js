@@ -1,8 +1,17 @@
 import * as React from 'react';
+import ReactDOM from 'react-dom';
+
 import './datatable.css';
 
 function DataTable(props) {
-  const {headers, data} = props;
+  const [state, setData] = React.useState({
+    sortby: null,
+    descending: null,
+    data: props.data
+  });
+
+  const {headers} = props;
+  
   let keyField = props.keyField || "id";
   let noData = props.noData || "No records found!";
   let width = props.width || "100%";
@@ -25,7 +34,7 @@ function DataTable(props) {
           style={{width: width}}
           data-col = {cleanTitle}
         >
-          <span className="header-cell">
+          <span className="header-cell" data-col = {cleanTitle}>
             {title}
           </span>
         </th>
@@ -36,7 +45,7 @@ function DataTable(props) {
   }
 
   const renderContent = () => {
-    let contentView = data.map((row, rowIdx) => {
+    let contentView = state.data.map((row, rowIdx) => {
       let id = row[keyField];
       let tds = headers.map((header, index) => {
         let content = row[header.accessor];
@@ -75,10 +84,42 @@ function DataTable(props) {
     );
   }
 
+    // Sort function
+  const onSort = (e) => {
+    let dataCopy = [...state.data];
+    // Get col index
+    let colIndex = ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
+    
+    let colTitle = e.target.dataset.col;
+
+    //alert(colTitle);
+
+    let descending = !state.descending;
+    dataCopy.sort((a, b) => {
+      let sortVal  = 0;
+      if (a[colTitle] < b[colTitle]) {
+        sortVal = -1; // asc
+      } else if(a[colTitle] > b[colTitle]) {
+        // desc
+        sortVal = 1;
+      }
+      if (descending) {
+        sortVal = sortVal * -1;
+      }
+      return sortVal;
+    });
+
+    setData({
+      sortby: colIndex,
+      descending,
+      data: dataCopy
+    });
+  }
+
   const renderTable = () => {
     let title = props.title || "DataTable";
     let headerView = renderTableHeader();
-    let contentView = data.length > 0 
+    let contentView = state.data.length > 0 
             ? renderContent() : renderNoData();
 
     return (
@@ -86,7 +127,7 @@ function DataTable(props) {
         <caption className="data-table-caption">
           {title}
         </caption>
-        <thead>
+        <thead onClick={onSort}>
           <tr>
             {headerView}
           </tr>
@@ -97,6 +138,8 @@ function DataTable(props) {
       </table>
     )
   }
+
+
 
   return (
     <div className={props.className}>
