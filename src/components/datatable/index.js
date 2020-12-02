@@ -57,7 +57,7 @@ function DataTable(props) {
         )
       });
        return (
-        <tr>
+        <tr key={id || rowIdx}>
           {tds}
         </tr>
        );
