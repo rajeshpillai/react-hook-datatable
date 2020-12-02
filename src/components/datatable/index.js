@@ -44,7 +44,7 @@ function DataTable(props) {
         if (cell) {
           if (typeof(cell) === "object") {
             if (cell.type === "image" && content) {
-              content = <img style={cell.style} src={content} />
+              content = <img alt={cell.alt || "image"} style={cell.style} src={content} />
             }
           } else if (typeof(cell) === "function") {
             content = cell(row);
