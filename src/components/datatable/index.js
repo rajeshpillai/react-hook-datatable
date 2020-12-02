@@ -47,7 +47,7 @@ function DataTable(props) {
               content = <img style={cell.style} src={content} />
             }
           } else if (typeof(cell) === "function") {
-            content = cell(content);
+            content = cell(row);
           }
         }
         return (
