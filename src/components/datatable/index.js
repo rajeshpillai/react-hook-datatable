@@ -29,6 +29,12 @@ function DataTable(props) {
     });
   }, [props]);
 
+  // For Sorting
+  React.useEffect(() => {
+    onGotoPage(state.currentPage);
+  },[state.descending, state.sortby])
+
+  // For pagination
   React.useEffect(() => {
     console.log("props", props);
     if (pagination.enabled) {
@@ -55,6 +61,7 @@ function DataTable(props) {
     targetHeader.index = temp;
 
     setData({
+      ...state,
       data: [...state.data],
       headers: state.headers,
     });
@@ -167,9 +174,11 @@ function DataTable(props) {
     });
 
     setData({
+      ...state,
       sortby: colIndex,
       descending,
       data: dataCopy,
+      // pagedData: getPagedData(state.currentPage,state.pageLength),
       headers: [...state.headers],
     });
   };
