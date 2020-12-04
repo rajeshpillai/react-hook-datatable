@@ -19,6 +19,7 @@ function App() {
         dataType: "string",
       },
     ],
+    pageLength: 10,
     data: [
       {
         userId: 1,
@@ -44,14 +45,11 @@ function App() {
   const [state, setState] = React.useState(setup);
 
   useEffect(() => {
-    fetchData(0, 10);
+    fetchData(0, state.pageLength);
   }, []);
 
   const fetchData = async (start, limit) => {
-    let resp = await fetch(
-      `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${limit}`
-    );
-    let data = await resp.json();
+    let data = await fetchDataOnly(1);
 
     setState({
       ...state,
@@ -59,13 +57,39 @@ function App() {
     });
   };
 
-  const fetchDataOnly = async (start, limit) => {
+  // const fetchDataOnly = async (start, limit) => {
+  //   let resp = await fetch(
+  //     `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${limit}`
+  //   );
+  //   let data = await resp.json();
+
+  //   return data;
+  // };
+
+  const fetchDataOnly = async (pageNo) => {
+    pageNo = parseInt(pageNo);
+    let start = state.pageLength * (pageNo - 1);
+
     let resp = await fetch(
-      `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${limit}`
+      `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}`
     );
     let data = await resp.json();
 
     return data;
+  };
+
+  // // For pagination
+  React.useEffect(() => {
+    //if (pagination.enabled && !props.pagination.serverSide) {
+    fetchData();
+    //}
+  }, [state.pageLength]);
+
+  const onPageLengthChange = (pageLength) => {
+    setState({
+      ...state,
+      pageLength,
+    });
   };
 
   const onUpdateTable = () => {};
@@ -98,7 +122,7 @@ function App() {
         edit={true}
         pagination={{
           enabled: true,
-          pageLength: 10,
+          pageLength: state.pageLength,
           type: "long", // long, short
           serverSide: true,
         }}
@@ -108,7 +132,8 @@ function App() {
         totalRecords={200}
         noData="No records!"
         onUpdate={onUpdateTable}
-        fetchDataOnly={fetchDataOnly}
+        onChangePage={fetchDataOnly}
+        onPageLengthChange={onPageLengthChange}
       />
     </div>
   );

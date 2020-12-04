@@ -26,6 +26,7 @@ function DataTable(props) {
       ...state,
       data: props.data,
       pagination: props.pagination,
+      pageLength: props.pagination.pageLength,
     });
   }, [props]);
 
@@ -51,10 +52,15 @@ function DataTable(props) {
   // For pagination
   React.useEffect(() => {
     console.log("props", props);
-    if (pagination.enabled && !props.pagination.serverSide) {
+    if (pagination.enabled) {
+      if (props.pagination.serverSide) {
+        //serverSide
+      } else {
+        //NOT server side
+        onGotoPage(state.currentPage);
+      }
       // let pages = Math.ceil(state.data.length / state.pageLength);
       // let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
-      onGotoPage(state.currentPage);
     }
   }, [state.pageLength]);
 
@@ -121,7 +127,7 @@ function DataTable(props) {
   };
 
   const renderContent = () => {
-    let data = pagination.enabled ? state.pagedData : state.data;
+    let data = state.pagedData; //pagination.enabled ? state.pagedData : state.data;
 
     let contentView = data.map((row, rowIdx) => {
       let id = row[keyField];
@@ -200,7 +206,8 @@ function DataTable(props) {
   const renderTable = () => {
     let title = props.title || "DataTable";
     let headerView = renderTableHeader();
-    let contentView = state.data.length > 0 ? renderContent() : renderNoData();
+    let contentView =
+      state.pagedData.length > 0 ? renderContent() : renderNoData();
 
     return (
       <table className="data-inner-table">
@@ -213,15 +220,36 @@ function DataTable(props) {
     );
   };
 
-  const onPageLengthChange = (pageLength) => {
+  const onPageLengthChange = async (pageLength) => {
     pageLength = parseInt(pageLength, 10);
-    let pages = Math.ceil(state.data.length / pageLength);
+    let pages =
+      Math.ceil(props.totalRecords / pageLength) ||
+      Math.ceil(state.data.length / pageLength);
     let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
-    setData({
-      ...state,
-      pageLength: parseInt(pageLength, 10),
-      currentPage,
-    });
+    if (props.pagination.serverSide) {
+      //Server side
+      // let pagedData = await props.onChangePage(currentPage);
+      // setData({
+      //   ...state,
+      //   data: pagedData,
+      //   pagedData: pagedData,
+      //   pageLength: parseInt(pageLength, 10),
+      //   currentPage,
+      // });
+      setData({
+        ...state,
+        currentPage: 1,
+      });
+      props.onPageLengthChange(pageLength);
+      // onGotoPage(currentPage);
+    } else {
+      setData({
+        ...state,
+        pageLength: parseInt(pageLength, 10),
+        currentPage,
+      });
+      props.onPageLengthChange(pageLength);
+    }
   };
 
   const getPagedData = (pageNo, pageLength) => {
@@ -236,13 +264,9 @@ function DataTable(props) {
 
   const onGotoPage = async (pageNo) => {
     if (props.pagination.serverSide) {
-      // let data = props.fetchDataOnly(10, 10);
       let pagedData = state.data;
       if (pageNo != state.currentPage) {
-        pagedData = await props.fetchDataOnly(
-          state.pageLength * (pageNo - 1),
-          state.pageLength
-        );
+        pagedData = await props.onChangePage(pageNo);
       }
       setData({
         ...state,
