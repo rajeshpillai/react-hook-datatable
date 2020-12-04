@@ -29,15 +29,29 @@ function DataTable(props) {
     });
   }, [props]);
 
+  // For pagnation to load data from serverside
+  React.useEffect(() => {
+    if (props.pagination && props.pagination.enabled) {
+      // onGotoPage(1);
+      setData({
+        ...state,
+        pagedData:
+          pagination.enabled && pagination.serverSide
+            ? state.data
+            : getPagedData(1, pagination.pageLength),
+      });
+    }
+  }, [state.data]);
+
   // For Sorting
   React.useEffect(() => {
     onGotoPage(state.currentPage);
-  },[state.descending, state.sortby])
+  }, [state.descending, state.sortby]);
 
   // For pagination
   React.useEffect(() => {
     console.log("props", props);
-    if (pagination.enabled) {
+    if (pagination.enabled && !props.pagination.serverSide) {
       // let pages = Math.ceil(state.data.length / state.pageLength);
       // let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
       onGotoPage(state.currentPage);
@@ -220,13 +234,30 @@ function DataTable(props) {
     return pagedData;
   };
 
-  const onGotoPage = (pageNo) => {
-    let pagedData = getPagedData(pageNo, state.pageLength);
-    setData({
-      ...state,
-      pagedData: pagedData,
-      currentPage: pageNo,
-    });
+  const onGotoPage = async (pageNo) => {
+    if (props.pagination.serverSide) {
+      // let data = props.fetchDataOnly(10, 10);
+      let pagedData = state.data;
+      if (pageNo != state.currentPage) {
+        pagedData = await props.fetchDataOnly(
+          state.pageLength * (pageNo - 1),
+          state.pageLength
+        );
+      }
+      setData({
+        ...state,
+        pagedData: pagedData,
+        data: pagedData,
+        currentPage: pageNo,
+      });
+    } else {
+      let pagedData = getPagedData(pageNo, state.pageLength);
+      setData({
+        ...state,
+        pagedData: pagedData,
+        currentPage: pageNo,
+      });
+    }
   };
 
   return (
@@ -234,7 +265,9 @@ function DataTable(props) {
       {pagination.enabled && (
         <Pagination
           type={pagination.type}
-          totalRecords={(state.data && state.data.length) || 0}
+          totalRecords={
+            props.totalRecords || (state.data && state.data.length) || 0
+          }
           pageLength={state.pageLength}
           onPageLengthChange={onPageLengthChange}
           onGotoPage={onGotoPage}
