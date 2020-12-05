@@ -48,7 +48,7 @@ function getData(overrides) {
 test('Renders a basic Data Table', () => {
   let state = getData();
 
-  const { getByText } = render(
+  const { container, getByText } = render(
     <DataTable
         className="data-table"
         title="USER PROFILES"
@@ -62,13 +62,14 @@ test('Renders a basic Data Table', () => {
   );
   const text = getByText(/USER PROFILES/i);
   expect(text).toBeInTheDocument();
+  expect(container.querySelectorAll("tr").length).toBe(4);
 });
 
 
 test('Renders a basic Data Table with no data', () => {
   let state = getData({data: []});
 
-  const { getByText } = render(
+  const { container, getByText } = render(
     <DataTable
         className="data-table"
         title="USER PROFILES"
@@ -83,4 +84,5 @@ test('Renders a basic Data Table with no data', () => {
   const text = getByText(/No records!/i);
   screen.debug();
   expect(text).toBeInTheDocument();
+  expect(container.querySelectorAll("tr").length).toBe(2);
 });
