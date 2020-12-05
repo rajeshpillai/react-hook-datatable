@@ -184,13 +184,13 @@ function DataTable(props) {
   // Sort function
   const onSort = (e) => {
     let colTitle = e.target.dataset.col;
+    let descending = !state.descending;
     if (pagination.serverSide) {
       //Server side
-      props.onSort &&
-        props.onSort(colTitle, !state.descending ? "desc" : "asc");
+      props.onSort && props.onSort(colTitle, descending ? "desc" : "asc");
       setData({
         ...state,
-        descending: !state.descending,
+        descending,
         currentPage: 1,
         sortby: colTitle,
       });
@@ -201,7 +201,7 @@ function DataTable(props) {
 
       //alert(colTitle);
 
-      let descending = !state.descending;
+      // let descending = colSortOrder;
       dataCopy.sort((a, b) => {
         let sortVal = 0;
         if (a[colTitle] < b[colTitle]) {
@@ -218,12 +218,14 @@ function DataTable(props) {
 
       setData({
         ...state,
-        sortby: colIndex,
+        // sortby: colIndex,
+        sortby: colTitle,
         descending,
         data: dataCopy,
         // pagedData: getPagedData(state.currentPage,state.pageLength),
         headers: [...state.headers],
       });
+      props.onSort && props.onSort(colTitle, descending ? "desc" : "asc");
     }
   };
 

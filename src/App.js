@@ -61,15 +61,6 @@ function App() {
     });
   };
 
-  // const fetchDataOnly = async (start, limit) => {
-  //   let resp = await fetch(
-  //     `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${limit}`
-  //   );
-  //   let data = await resp.json();
-
-  //   return data;
-  // };
-
   const fetchDataOnly = async (pageNo) => {
     pageNo = parseInt(pageNo);
     let start = state.pageLength * (pageNo - 1);
@@ -106,7 +97,6 @@ function App() {
         sortOrder: order,
       },
     });
-    // fetchData();
   };
 
   const onUpdateTable = () => {};
