@@ -5,22 +5,47 @@ import "./datatable.css";
 import Pagination from "../pagination";
 
 function DataTable(props) {
+  let isSortEnabled = (props.sort && props.sort.enabled) || false;
+  let totalRecords = () => {
+    if (props.totalRecords) return props.totalRecords;
+    else if (props.data) {
+      return props.data.length;
+    }
+    return 0;
+  };
+  let isPaginationEnabled =
+    (props.pagination ? props.pagination.enabled : false) || false;
+  let pagination = isPaginationEnabled
+    ? props.pagination
+    : {
+        enabled: false,
+        pageLength: totalRecords(),
+        type: "long",
+      };
+
+  // console.log("isPaginationEnabled", isPaginationEnabled);
+  let isServerSide = props.serverSideDataLoad || false;
+  let sort = isSortEnabled
+    ? props.sort
+      ? props.sort
+      : { enabled: false }
+    : { enabled: false };
+  let keyField = props.keyField || "id";
+  let noData = props.noData || "No records found!";
+  let width = props.width || "100%";
+
   const [state, setData] = React.useState({
-    sortby: props.sortCol || null,
+    sortby: (isSortEnabled && props.sort.sortCol) || null,
     descending:
-      (props.sortOrder ? props.sortOrder.toLowerCase() == "desc" : false) ||
-      null,
+      (isSortEnabled && props.sort
+        ? props.sort.sortOrder.toLowerCase() == "desc"
+        : false) || null,
     data: props.data,
     pagedData: props.data,
     headers: props.headers,
     // pageLength: props.pagination.pageLength || 5,
     currentPage: 1,
   });
-
-  let keyField = props.keyField || "id";
-  let noData = props.noData || "No records found!";
-  let width = props.width || "100%";
-  let pagination = props.pagination;
 
   // Update local state, when the parent changes the props of DataTable
   React.useEffect(() => {
@@ -36,23 +61,22 @@ function DataTable(props) {
   React.useEffect(() => {
     setData({
       ...state,
-      sortby: props.sortCol || null,
+      sortby: sort.sortCol || null,
       descending:
-        (props.sortOrder ? props.sortOrder.toLowerCase() == "desc" : false) ||
+        (sort.sortOrder ? sort.sortOrder.toLowerCase() == "desc" : false) ||
         null,
     });
-  }, [props.sortCol, props.sortOrder]);
+  }, [sort.sortCol, sort.sortOrder]);
 
   // For pagnation to load data from serverside
   React.useEffect(() => {
-    if (props.pagination && props.pagination.enabled) {
+    if (isPaginationEnabled) {
       // onGotoPage(1);
       setData({
         ...state,
-        pagedData:
-          pagination.enabled && pagination.serverSide
-            ? state.data
-            : getPagedData(1, pagination.pageLength),
+        pagedData: isServerSide
+          ? state.data
+          : getPagedData(1, pagination.pageLength),
       });
     }
   }, [state.data]);
@@ -64,18 +88,16 @@ function DataTable(props) {
 
   // For pagination
   React.useEffect(() => {
-    console.log("props", props);
-    if (pagination.enabled) {
-      if (props.pagination.serverSide) {
+    // console.log("props", props);
+    if (isPaginationEnabled) {
+      if (isServerSide) {
         //serverSide
       } else {
         //NOT server side
         onGotoPage(state.currentPage);
       }
-      // let pages = Math.ceil(state.data.length / state.pageLength);
-      // let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
     }
-  }, [props.pagination.pageLength]);
+  }, [pagination.pageLength]);
 
   // Col drag and drop events
   const onDragStart = (e, srcIndex) => {
@@ -140,7 +162,7 @@ function DataTable(props) {
   };
 
   const renderContent = () => {
-    let data = state.pagedData; //pagination.enabled ? state.pagedData : state.data;
+    let data = state.pagedData; //isPaginationEnabled ? state.pagedData : state.data;
 
     let contentView = data.map((row, rowIdx) => {
       let id = row[keyField];
@@ -183,11 +205,14 @@ function DataTable(props) {
 
   // Sort function
   const onSort = (e) => {
+    if (!isSortEnabled) {
+      return false;
+    }
     let colTitle = e.target.dataset.col;
     let descending = !state.descending;
-    if (pagination.serverSide) {
+    if (isServerSide) {
       //Server side
-      props.onSort && props.onSort(colTitle, descending ? "desc" : "asc");
+      sort.onSort && sort.onSort(colTitle, descending ? "desc" : "asc");
       setData({
         ...state,
         descending,
@@ -249,10 +274,10 @@ function DataTable(props) {
   const onPageLengthChange = async (pageLength) => {
     pageLength = parseInt(pageLength, 10);
     let pages =
-      Math.ceil(props.totalRecords / pageLength) ||
+      Math.ceil(totalRecords() / pageLength) ||
       Math.ceil(state.data.length / pageLength);
     let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
-    if (props.pagination.serverSide) {
+    if (isServerSide) {
       //Server side
       // let pagedData = await props.onChangePage(currentPage);
       // setData({
@@ -267,14 +292,16 @@ function DataTable(props) {
         currentPage: 1,
         //pageLength: parseInt(pageLength, 10),
       });
-      props.onPageLengthChange && props.onPageLengthChange(pageLength);
+      pagination.onPageLengthChange &&
+        pagination.onPageLengthChange(pageLength);
     } else {
       setData({
         ...state,
         // pageLength: parseInt(pageLength, 10),
         currentPage,
       });
-      props.onPageLengthChange && props.onPageLengthChange(pageLength);
+      pagination.onPageLengthChange &&
+        pagination.onPageLengthChange(pageLength);
     }
   };
 
@@ -289,10 +316,10 @@ function DataTable(props) {
   };
 
   const onGotoPage = async (pageNo) => {
-    if (props.pagination.serverSide) {
+    if (isServerSide) {
       let pagedData = state.data;
-      if (pageNo != state.currentPage) {
-        pagedData = await props.onChangePage(pageNo);
+      if (pageNo != state.currentPage && pagination.onChangePage) {
+        pagedData = await pagination.onChangePage(pageNo);
       }
       setData({
         ...state,
@@ -301,7 +328,7 @@ function DataTable(props) {
         currentPage: pageNo,
       });
     } else {
-      let pagedData = getPagedData(pageNo, props.pagination.pageLength);
+      let pagedData = getPagedData(pageNo, pagination.pageLength);
       setData({
         ...state,
         pagedData: pagedData,
@@ -312,14 +339,12 @@ function DataTable(props) {
 
   return (
     <div className={props.className}>
-      {pagination.enabled && (
+      {isPaginationEnabled && (
         <Pagination
           type={pagination.type}
-          totalRecords={
-            props.totalRecords || (state.data && state.data.length) || 0
-          }
-          pageLength={props.pagination.pageLength}
-          onPageLengthChange={onPageLengthChange}
+          totalRecords={totalRecords()}
+          pageLength={pagination.pageLength}
+          onPageLengthChange={pagination.onPageLengthChange}
           onGotoPage={onGotoPage}
           currentPage={state.currentPage}
         >
