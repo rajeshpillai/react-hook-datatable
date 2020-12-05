@@ -26,8 +26,15 @@ export default function Pagination(props) {
     }
   }, [props]);
 
-  const onPageLengthChange = () => {
-    props.onPageLengthChange(pageLengthInput.current.value);
+  // const onPageLengthChange = () => {
+  //   props.onPageLengthChange(pageLengthInput.current.value);
+  // };
+
+  const onKeyUp = (e) => {
+    // alert(e.which == 13);
+    if (e.which == 13) {
+      props.onPageLengthChange(pageLengthInput.current.value);
+    }
   };
 
   const onPrevPage = (e) => {
@@ -99,7 +106,8 @@ export default function Pagination(props) {
           min="1"
           ref={pageLengthInput}
           defaultValue={props.pageLength || 5}
-          onChange={onPageLengthChange}
+          // onChange={onPageLengthChange}
+          onKeyUp={onKeyUp}
         />
       </span>
     </React.Fragment>

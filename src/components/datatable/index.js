@@ -6,12 +6,14 @@ import Pagination from "../pagination";
 
 function DataTable(props) {
   const [state, setData] = React.useState({
-    sortby: null,
-    descending: null,
+    sortby: props.sortCol || null,
+    descending:
+      (props.sortOrder ? props.sortOrder.toLowerCase() == "desc" : false) ||
+      null,
     data: props.data,
     pagedData: props.data,
     headers: props.headers,
-    pageLength: props.pagination.pageLength || 5,
+    // pageLength: props.pagination.pageLength || 5,
     currentPage: 1,
   });
 
@@ -25,10 +27,21 @@ function DataTable(props) {
     setData({
       ...state,
       data: props.data,
-      pagination: props.pagination,
-      pageLength: props.pagination.pageLength,
+      // pagination: props.pagination,
+      // pageLength: props.pagination.pageLength,
     });
-  }, [props]);
+  }, [props.data]);
+
+  // // Update local state, when the parent changes the props of DataTable
+  React.useEffect(() => {
+    setData({
+      ...state,
+      sortby: props.sortCol || null,
+      descending:
+        (props.sortOrder ? props.sortOrder.toLowerCase() == "desc" : false) ||
+        null,
+    });
+  }, [props.sortCol, props.sortOrder]);
 
   // For pagnation to load data from serverside
   React.useEffect(() => {
@@ -62,7 +75,7 @@ function DataTable(props) {
       // let pages = Math.ceil(state.data.length / state.pageLength);
       // let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
     }
-  }, [state.pageLength]);
+  }, [props.pagination.pageLength]);
 
   // Col drag and drop events
   const onDragStart = (e, srcIndex) => {
@@ -103,7 +116,7 @@ function DataTable(props) {
       let cleanTitle = header.accessor;
       let width = header.width;
 
-      if (state.sortby === index) {
+      if (state.sortby === cleanTitle) {
         title += state.descending ? "\u2193" : "\u2191";
       }
 
@@ -170,37 +183,48 @@ function DataTable(props) {
 
   // Sort function
   const onSort = (e) => {
-    let dataCopy = [...state.data];
-    // Get col index
-    let colIndex = ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
-
     let colTitle = e.target.dataset.col;
+    if (pagination.serverSide) {
+      //Server side
+      props.onSort &&
+        props.onSort(colTitle, !state.descending ? "desc" : "asc");
+      setData({
+        ...state,
+        descending: !state.descending,
+        currentPage: 1,
+        sortby: colTitle,
+      });
+    } else {
+      let dataCopy = [...state.data];
+      // Get col index
+      let colIndex = ReactDOM.findDOMNode(e.target).parentNode.cellIndex;
 
-    //alert(colTitle);
+      //alert(colTitle);
 
-    let descending = !state.descending;
-    dataCopy.sort((a, b) => {
-      let sortVal = 0;
-      if (a[colTitle] < b[colTitle]) {
-        sortVal = -1; // asc
-      } else if (a[colTitle] > b[colTitle]) {
-        // desc
-        sortVal = 1;
-      }
-      if (descending) {
-        sortVal = sortVal * -1;
-      }
-      return sortVal;
-    });
+      let descending = !state.descending;
+      dataCopy.sort((a, b) => {
+        let sortVal = 0;
+        if (a[colTitle] < b[colTitle]) {
+          sortVal = -1; // asc
+        } else if (a[colTitle] > b[colTitle]) {
+          // desc
+          sortVal = 1;
+        }
+        if (descending) {
+          sortVal = sortVal * -1;
+        }
+        return sortVal;
+      });
 
-    setData({
-      ...state,
-      sortby: colIndex,
-      descending,
-      data: dataCopy,
-      // pagedData: getPagedData(state.currentPage,state.pageLength),
-      headers: [...state.headers],
-    });
+      setData({
+        ...state,
+        sortby: colIndex,
+        descending,
+        data: dataCopy,
+        // pagedData: getPagedData(state.currentPage,state.pageLength),
+        headers: [...state.headers],
+      });
+    }
   };
 
   const renderTable = () => {
@@ -239,16 +263,16 @@ function DataTable(props) {
       setData({
         ...state,
         currentPage: 1,
+        //pageLength: parseInt(pageLength, 10),
       });
-      props.onPageLengthChange(pageLength);
-      // onGotoPage(currentPage);
+      props.onPageLengthChange && props.onPageLengthChange(pageLength);
     } else {
       setData({
         ...state,
-        pageLength: parseInt(pageLength, 10),
+        // pageLength: parseInt(pageLength, 10),
         currentPage,
       });
-      props.onPageLengthChange(pageLength);
+      props.onPageLengthChange && props.onPageLengthChange(pageLength);
     }
   };
 
@@ -275,7 +299,7 @@ function DataTable(props) {
         currentPage: pageNo,
       });
     } else {
-      let pagedData = getPagedData(pageNo, state.pageLength);
+      let pagedData = getPagedData(pageNo, props.pagination.pageLength);
       setData({
         ...state,
         pagedData: pagedData,
@@ -292,7 +316,7 @@ function DataTable(props) {
           totalRecords={
             props.totalRecords || (state.data && state.data.length) || 0
           }
-          pageLength={state.pageLength}
+          pageLength={props.pagination.pageLength}
           onPageLengthChange={onPageLengthChange}
           onGotoPage={onGotoPage}
           currentPage={state.currentPage}

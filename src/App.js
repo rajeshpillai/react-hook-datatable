@@ -16,10 +16,14 @@ function App() {
         title: "Completed",
         accessor: "completed",
         index: 3,
-        dataType: "string",
+        dataType: "boolean",
       },
     ],
     pageLength: 10,
+    sort: {
+      sortCol: "id",
+      sortOrder: "Asc",
+    },
     data: [
       {
         userId: 1,
@@ -71,7 +75,7 @@ function App() {
     let start = state.pageLength * (pageNo - 1);
 
     let resp = await fetch(
-      `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}`
+      `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder}`
     );
     let data = await resp.json();
 
@@ -83,13 +87,26 @@ function App() {
     //if (pagination.enabled && !props.pagination.serverSide) {
     fetchData();
     //}
-  }, [state.pageLength]);
+  }, [state.pageLength, state.sort]);
 
   const onPageLengthChange = (pageLength) => {
     setState({
       ...state,
       pageLength,
     });
+  };
+
+  const onSort = (col, order) => {
+    console.log(col, order);
+    setState({
+      ...state,
+      sort: {
+        ...state.sort,
+        sortCol: col,
+        sortOrder: order,
+      },
+    });
+    // fetchData();
   };
 
   const onUpdateTable = () => {};
@@ -122,7 +139,7 @@ function App() {
         edit={true}
         pagination={{
           enabled: true,
-          pageLength: state.pageLength,
+          pageLength: state.pageLength, //for server side keep in state
           type: "long", // long, short
           serverSide: true,
         }}
@@ -132,8 +149,11 @@ function App() {
         totalRecords={200}
         noData="No records!"
         onUpdate={onUpdateTable}
-        onChangePage={fetchDataOnly}
+        onChangePage={fetchDataOnly} //for server side
         onPageLengthChange={onPageLengthChange}
+        onSort={onSort}
+        sortCol={state.sort.sortCol}
+        sortOrder={state.sort.sortOrder}
       />
     </div>
   );
