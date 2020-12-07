@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 
 import "./datatable.css";
@@ -34,7 +34,7 @@ function DataTable(props) {
   let noData = props.noData || "No records found!";
   let width = props.width || "100%";
 
-  const [state, setData] = React.useState({
+  const [state, setData] = useState({
     sortby: (isSortEnabled && props.sort.sortCol) || null,
     descending:
       (isSortEnabled && props.sort
@@ -48,7 +48,7 @@ function DataTable(props) {
   });
 
   // Update local state, when the parent changes the props of DataTable
-  React.useEffect(() => {
+  useEffect(() => {
     setData({
       ...state,
       data: props.data,
@@ -58,7 +58,7 @@ function DataTable(props) {
   }, [props.data]);
 
   // // Update local state, when the parent changes the props of DataTable
-  React.useEffect(() => {
+  useEffect(() => {
     setData({
       ...state,
       sortby: sort.sortCol || null,
@@ -69,7 +69,7 @@ function DataTable(props) {
   }, [sort.sortCol, sort.sortOrder]);
 
   // For pagnation to load data from serverside
-  React.useEffect(() => {
+  useEffect(() => {
     if (isPaginationEnabled) {
       // onGotoPage(1);
       setData({
@@ -82,12 +82,12 @@ function DataTable(props) {
   }, [state.data]);
 
   // For Sorting
-  React.useEffect(() => {
+  useEffect(() => {
     onGotoPage(state.currentPage);
   }, [state.descending, state.sortby]);
 
   // For pagination
-  React.useEffect(() => {
+  useEffect(() => {
     // console.log("props", props);
     if (isPaginationEnabled) {
       if (isServerSide) {
@@ -190,14 +190,18 @@ function DataTable(props) {
           </td>
         );
       });
-      return <tr key={id || rowIdx}>{tds}</tr>;
+      return (
+        <tr className="datatable-row" key={id || rowIdx}>
+          {tds}
+        </tr>
+      );
     });
     return contentView;
   };
 
   const renderNoData = () => {
     return (
-      <tr>
+      <tr className="no-data">
         <td colSpan={state.headers.length}>{noData}</td>
       </tr>
     );

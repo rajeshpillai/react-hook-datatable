@@ -1,17 +1,17 @@
-import React from "react";
+import React, { useRef, useState, useEffect, Fragment } from "react";
 import "./pagination.css";
 
 export default function Pagination(props) {
-  const [state, setData] = React.useState({
+  const [state, setData] = useState({
     currentPage: props.currentPage || 1,
   });
-  const pageLengthInput = React.useRef();
-  const currentPageInput = React.useRef();
+  const pageLengthInput = useRef();
+  const currentPageInput = useRef();
   let totalRecords = props.totalRecords;
   let pages = Math.ceil(totalRecords / props.pageLength);
 
   // Update local state, when the parent changes the props
-  React.useEffect(() => {
+  useEffect(() => {
     setData({
       ...state,
       ...props,
@@ -32,7 +32,8 @@ export default function Pagination(props) {
 
   const onKeyUp = (e) => {
     // alert(e.which == 13);
-    if (e.which == 13) {
+    // console.log(e.key);
+    if (e.which == 13 || e.key == "Enter") {
       props.onPageLengthChange(pageLengthInput.current.value);
     }
   };
@@ -97,11 +98,12 @@ export default function Pagination(props) {
   };
 
   let pageSelector = (
-    <React.Fragment key="f-page-selector">
+    <Fragment key="f-page-selector">
       <span key="page-selector" className="page-selector">
         Rows per page:
         <input
           key="page-input"
+          className="page-length-input"
           type="number"
           min="1"
           ref={pageLengthInput}
@@ -110,7 +112,7 @@ export default function Pagination(props) {
           onKeyUp={onKeyUp}
         />
       </span>
-    </React.Fragment>
+    </Fragment>
   );
 
   let prevButton = (

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import DataTable from "./components/datatable";
 function App() {
@@ -17,6 +17,27 @@ function App() {
         accessor: "completed",
         index: 3,
         dataType: "boolean",
+      },
+      {
+        title: "Rating",
+        accessor: "rating",
+        index: 5,
+        width: "200px",
+        cell: (row) => (
+          <div className="rating">
+            <div
+              style={{
+                backgroundColor: "lightskyblue",
+                textAlign: "center",
+                height: "1.9em",
+                width: (row.rating / 5) * 201 + "px",
+                margin: "3px 0 4px 0",
+              }}
+            >
+              <a href={`/showchart/${row.id}`}>{row.rating}</a>
+            </div>
+          </div>
+        ),
       },
     ],
     pageLength: 10,
@@ -149,7 +170,7 @@ function App() {
     ],
   };
 
-  const [state, setState] = React.useState(setup);
+  const [state, setState] = useState(setup);
 
   useEffect(() => {
     fetchData(0, state.pageLength);
@@ -177,7 +198,7 @@ function App() {
   };
 
   // // For pagination
-  React.useEffect(() => {
+  useEffect(() => {
     //if (pagination.enabled && !props.pagination.serverSide) {
     fetchData();
     //}
