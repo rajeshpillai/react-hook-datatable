@@ -6,37 +6,56 @@ function getData(overrides) {
   let state = {
     headers: [
       {
-        title: "Profile",
-        accessor: "profile",
+        title: "id",
+        accessor: "id",
         width: "80px",
-        index: 1,
-        cell: {
-          type: "image",
-          style: {
-            width: "50px",
-          },
-        },
+        dataType: "string",
+        index: 1
       },
       {
         title: "Name",
         accessor: "name",
         width: "300px",
         index: 2,
-        dataType: "string",
-      }
+        dataType: "string"
+      },
+      {
+        title: "Rating",
+        accessor: "rating",
+        index: 1,
+        width: "200px",
+        cell: (row) => (
+          <div className="rating">
+            <div
+              style={{
+                backgroundColor: "lightskyblue",
+                textAlign: "center",
+                height: "1.9em",
+                width: (row.rating / 5) * 201 + "px",
+                margin: "3px 0 4px 0",
+              }}
+            >
+              <a href={`/showchart/${row.id}`}>{row.rating}</a>
+            </div>
+          </div>
+        ),
+      },
     ],
     data: [
       {
         id: 1,
-        name: "a"
+        name: "john",
+        rating: "3"
       },
       {
         id: 2,
-        name: "b"       
+        name: "amar",
+        rating: "4"       
       },
       {
         id: 3,
-        name: "c"
+        name: "floppy",
+        rating: "5"
       }
     ],
     ...overrides
@@ -45,44 +64,61 @@ function getData(overrides) {
   return state;
 }
 
-test('Renders a basic Data Table', () => {
-  let state = getData();
+describe("Simple data table use cases", () => {
+  it('Renders a basic Data Table', () => {
+    let state = getData();
 
-  const { container, getByText } = render(
-    <DataTable
-        className="data-table"
-        title="USER PROFILES"
-        keyField="id"
-        edit={true}
-        width="100%"
-        headers={state.headers}
-        data={state.data}
-        noData="No records!"
-      />
-  );
-  const text = getByText(/USER PROFILES/i);
-  expect(text).toBeInTheDocument();
-  expect(container.querySelectorAll("tr").length).toBe(4);
-});
+    const { container, getByText } = render(
+      <DataTable
+          className="data-table"
+          title="USER PROFILES"
+          keyField="id"
+          width="100%"
+          headers={state.headers}
+          data={state.data}
+          noData="No records!"
+        />
+    );
+    const text = getByText(/USER PROFILES/i);
+    expect(text).toBeInTheDocument();
+    expect(container.querySelectorAll("tr").length).toBe(4);
+  });
 
 
-test('Renders a basic Data Table with no data', () => {
-  let state = getData({data: []});
+  it('Renders a basic Data Table with no data', () => {
+    let state = getData({data: []});
 
-  const { container, getByText } = render(
-    <DataTable
-        className="data-table"
-        title="USER PROFILES"
-        keyField="id"
-        edit={true}
-        width="100%"
-        headers={state.headers}
-        data={state.data}
-        noData="No records!"
-      />
-  );
-  const text = getByText(/No records!/i);
-  screen.debug();
-  expect(text).toBeInTheDocument();
-  expect(container.querySelectorAll("tr").length).toBe(2);
-});
+    const { container, getByText } = render(
+      <DataTable
+          className="data-table"
+          title="USER PROFILES"
+          keyField="id"
+          width="100%"
+          headers={state.headers}
+          data={state.data}
+          noData="No records!"
+        />
+    );
+    const text = getByText(/No records!/i);
+    // screen.debug();
+    expect(text).toBeInTheDocument();
+    expect(container.querySelectorAll("tr").length).toBe(2);
+  });
+
+  it('Renders a custom column', () => {
+    let state = getData();
+
+    const {container, getByText} = render(
+      <DataTable
+          className="data-table"
+          title="USER PROFILES"
+          keyField="id"
+          width="100%"
+          headers={state.headers}
+          data={state.data}
+          noData="No records!"
+        />
+    );
+    expect(container.querySelectorAll(".rating").length).toBe(3);
+  });
+})
