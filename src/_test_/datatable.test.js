@@ -7,11 +7,11 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
-import Adapter from "enzyme-adapter-react-16";
-import { shallow, configure, mount } from "enzyme";
+// import Adapter from "enzyme-adapter-react-16";
+// import { shallow, configure, mount } from "enzyme";
 import DataTable from "../components/datatable";
 
-configure({ adapter: new Adapter() });
+// configure({ adapter: new Adapter() });
 
 // First set of Unit Test cases
 // 1.  Ability to render a data table with stubbed data (no pagination)
@@ -300,7 +300,7 @@ test("Pagination component rendered when data at client side", () => {
 
 test("Pagination on click of next button and page button state gets updated", () => {
   //Render Datatable
-  const wrapper = mount(
+  const {container, getBy} = render(
     <DataTable
       headers={headers}
       data={data}
@@ -311,34 +311,17 @@ test("Pagination on click of next button and page button state gets updated", ()
   const setData = jest.fn();
   const handleClick = jest.spyOn(React, "useState");
   handleClick.mockImplementation((state) => [state, setData]);
-  wrapper.find(".pagination-btn.next").simulate("click");
+  
+  //wrapper.find(".pagination-btn.next").simulate("click");
+  fireEvent.click(container.querySelector('.pagination-btn.next'));
   expect(setData).toBeTruthy();
 
   //btn-2
-  wrapper.find("#btn-2").simulate("click");
+  //wrapper.find("#btn-2").simulate("click");
+  fireEvent.click(container.querySelector('#btn-2'));
   expect(setData).toBeTruthy();
 });
 
-test("Pagination on click of next button and page button state gets updated", () => {
-  //Render Datatable
-  const wrapper = mount(
-    <DataTable
-      headers={headers}
-      data={data}
-      pagination={pagination}
-      serverSideDataLoad={false}
-    ></DataTable>
-  );
-  const setData = jest.fn();
-  const handleClick = jest.spyOn(React, "useState");
-  handleClick.mockImplementation((state) => [state, setData]);
-  wrapper.find(".pagination-btn.next").simulate("click");
-  expect(setData).toBeTruthy();
-
-  //btn-2
-  wrapper.find("#btn-2").simulate("click");
-  expect(setData).toBeTruthy();
-});
 
 test("Pagination on change page length props.onPageLengthChange is called", () => {
   //Render Datatable
