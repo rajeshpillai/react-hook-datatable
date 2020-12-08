@@ -6,6 +6,7 @@ import Pagination from "../pagination";
 
 function DataTable(props) {
   let isSortEnabled = (props.sort && props.sort.enabled) || false;
+  let isEditable = props.edit || false;
   let totalRecords = () => {
     if (props.totalRecords) return props.totalRecords;
     else if (props.data) {
@@ -161,6 +162,98 @@ function DataTable(props) {
     return headerView;
   };
 
+  const onCellDataChange = (e, header, rowIdx, colIdx) => {
+    let newValue = e.target.value;
+    console.log("newValue", newValue);
+    let data = [...state.data];
+    data[rowIdx][header.accessor] =
+      header.dataType == "boolean"
+        ? JSON.parse(newValue.toLowerCase())
+        : newValue;
+    setData({
+      ...state,
+      data,
+    });
+  };
+
+  const getCellContent = (header, value, rowIdx, colIdx) => {
+    if (isEditable && header.controlType) {
+      switch (header.controlType) {
+        case "text":
+          let controlType = header.controlType;
+          if (header.dataType == "number" || header.dataType == "email") {
+            controlType = header.dataType;
+          }
+          return (
+            <input
+              type={controlType}
+              name={header.accessor}
+              value={value}
+              onChange={(e) => onCellDataChange(e, header, rowIdx, colIdx)}
+            ></input>
+          );
+          break;
+        case "textarea":
+          return (
+            <textarea
+              name={header.accessor}
+              onChange={(e) => onCellDataChange(e, header, rowIdx, colIdx)}
+              value={value}
+            ></textarea>
+          );
+          break;
+        case "select":
+          return (
+            <select
+              name={header.accessor}
+              value={value}
+              onChange={(e) => onCellDataChange(e, header, rowIdx, colIdx)}
+            >
+              {header.options.map((opt) => {
+                return (
+                  <option
+                    key={"o" + opt.value}
+                    // selected={value == opt.value}
+                    value={opt.value}
+                  >
+                    {opt.text}
+                  </option>
+                );
+              })}
+            </select>
+          );
+          break;
+        case "radio":
+          return header.options.map((opt) => {
+            return (
+              <React.Fragment key={"o" + opt.value}>
+                <input
+                  // key={"o" + opt.value}
+                  type="radio"
+                  name={header.accessor + rowIdx}
+                  value={opt.value}
+                  checked={value == opt.value}
+                  onChange={(e) => onCellDataChange(e, header, rowIdx, colIdx)}
+                ></input>{" "}
+                {opt.text}
+              </React.Fragment>
+            );
+          });
+          break;
+      }
+      // return (
+      //   <input
+      //     type={header.controlType}
+      //     name={header.accessor}
+      //     value={value}
+      //     onChange={(e) => onCellDataChange(e, header, rowIdx, colIdx)}
+      //   ></input>
+      // );
+    } else {
+      return value;
+    }
+  };
+
   const renderContent = () => {
     let data = state.pagedData; //isPaginationEnabled ? state.pagedData : state.data;
 
@@ -186,7 +279,7 @@ function DataTable(props) {
         }
         return (
           <td key={index} data-id={id} data-row={rowIdx}>
-            {content}
+            {getCellContent(header, content, rowIdx, index)}
           </td>
         );
       });
@@ -341,6 +434,12 @@ function DataTable(props) {
     }
   };
 
+  const onSubmit = () => {
+    if (props.onUpdateData) {
+      props.onUpdateData(state.data);
+    }
+  };
+
   return (
     <div className={props.className}>
       {isPaginationEnabled && (
@@ -356,6 +455,11 @@ function DataTable(props) {
         </Pagination>
       )}
       {renderTable()}
+      {isEditable && (
+        <div>
+          <input type="button" value="Submit" onClick={onSubmit} />
+        </div>
+      )}
     </div>
   );
 }
