@@ -228,30 +228,32 @@ function Gvm() {
         edit={false}
         serverSideDataLoad={true}
         server={{
-          endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-          dataKey: "articles",
-          totalRecordsKey: "articles_count",
+          data: {
+            endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+            dataKey: "articles",
+            totalRecordsKey: "articles_count",
+          },
+          // countRecords: {
+          //   endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+          //   totalRecordsKey: "articles",
+          // },
         }}
         pagination={{
           enabled: true,
           pageLength: state.pageLength, //for server side keep in state
           type: "long", // long, short
           // onChangePage: fetchDataOnly,
-          // onPageLengthChange: onPageLengthChange,
           startQueryKey: "offset",
           limitQueryKey: "limit",
         }}
         sort={{
           enabled: true,
-          // onSort: onSort,
           sortCol: state.sort.sortCol,
           sortOrder: state.sort.sortOrder,
         }}
         width="100%"
         headers={state.headers}
         // data={state.data}
-        // totalRecords={state.totalRecords}
-        // data={[]}
         noData="No records!"
         onUpdateData={onUpdateData}
       />

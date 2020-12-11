@@ -25,21 +25,8 @@ function DataTable(props) {
   let isPaginationEnabled =
     (props.pagination ? props.pagination.enabled : false) || false;
 
-  // let pagination = isPaginationEnabled
-  //   ? props.pagination
-  //   : {
-  //       enabled: false,
-  //       pageLength: state.totalRecords,
-  //       type: "long",
-  //     };
-
-  // console.log("isPaginationEnabled", isPaginationEnabled);
   let isServerSide = props.serverSideDataLoad || false;
-  // let sort = isSortEnabled
-  //   ? props.sort
-  //     ? props.sort
-  //     : { enabled: false }
-  //   : { enabled: false };
+
   let keyField = props.keyField || "id";
   let noData = props.noData || "No records found!";
   let width = props.width || "100%";
@@ -54,7 +41,6 @@ function DataTable(props) {
     pagedData: props.data || [],
     headers: props.headers,
     totalRecords: getTotalRecords(),
-    // pageLength: props.state.pagination.pageLength || 5,
     currentPage: 1,
     pagination: isPaginationEnabled
       ? { ...defaultPagination, ...props.pagination }
@@ -66,125 +52,51 @@ function DataTable(props) {
       : defaultSort,
   });
 
-  // Update local state, when the parent changes the props of DataTable
-  // useEffect(() => {
-  //   setData({
-  //     ...state,
-  //     data: props.data,
-  //     // pagination: props.pagination,
-  //     // pageLength: props.state.pagination.pageLength,
-  //   });
-  // }, [props.data]);
-
-  // Fetch data if server side enabled
-  // useEffect(() => {
-  //   if (isServerSide) {
-  //     fetchData(0, state.pageLength);
-  //   } else {
-  //     setData({
-  //       ...state,
-  //       data: props.data || [],
-  //     });
-  //   }
-
-  //   //endpoint
-  // }, []);
-
-  // For pagnation to load data from serverside
-  // useEffect(() => {
-  //   if (isPaginationEnabled) {
-  //     // onGotoPage(1);
-  //     setData({
-  //       ...state,
-  //       pagedData: isServerSide
-  //         ? state.data
-  //         : getPagedData(1, state.pagination.pageLength),
-  //     });
-  //   }
-  // }, [state.data]);
-
-  // For Sorting
+  // For first time load, pagination and Sorting
   useEffect(() => {
-    //
-    // if (isServerSide) {
-    //   fetchDataOnly(state.currentPage);
-    // } else {
-    //   onGotoPage(state.currentPage);
-    // }
-    // if (state.descending != null) {
     onGotoPage(1);
-    // }
   }, [state.sort.sortCol, state.sort.sortOrder, state.pagination.pageLength]);
-
-  // For pagination
-  // useEffect(() => {
-  //   onGotoPage(1);
-  //   // // console.log("props", props);
-  //   // if (isPaginationEnabled) {
-  //   //   if (isServerSide) {
-  //   //     //serverSide
-  //   //     fetchData();
-  //   //     // setData({
-  //   //     //   ...state,
-  //   //     //   data: pagedData,
-  //   //     //   pagedData: pagedData,
-  //   //     //   currentPage: 1,
-  //   //     // });
-  //   //   } else {
-  //   //     //NOT server side
-  //   //     onGotoPage(state.currentPage);
-  //   //   }
-  //   // }
-  // }, [state.pagination.pageLength]);
-
-  // // Update local state, when the parent changes the props of DataTable
-  // useEffect(() => {
-  //   setData({
-  //     ...state,
-  //     sortby: state.sort.sortCol || null,
-  //     descending:
-  //       (state.sort.sortOrder
-  //         ? state.sort.sortOrder.toLowerCase() == "desc"
-  //         : false) || null,
-  //   });
-  // }, [state.sort.sortCol, state.sort.sortOrder]);
-
-  // const fetchData = async (start, limit) => {
-  //   let result = await fetchDataOnly(1);
-  //   setData({
-  //     ...state,
-  //     data: result.data,
-  //     pagedData: result.data,
-  //     totalRecords: result.totalRecords,
-  //   });
-  // };
 
   const fetchDataOnly = async (pageNo) => {
     pageNo = parseInt(pageNo);
     let start = state.pagination.pageLength * (pageNo - 1);
-
+    if (!props.server || (props.server && !props.server.data)) {
+      throw new Error("Please provide Server side api url for data");
+    }
     // let resp = await fetch(
     //   `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder}`
     // );
-    let apiUrl = `${props.server.endpoint}`;
+    let apiUrl = `${props.server.data.endpoint}`;
+    let dataKey = props.server.data.dataKey;
+    let totalRecordsKey = props.server.data.totalRecordsKey;
+
+    //If pagination enabled then set start and limit in API URL
     if (isPaginationEnabled) {
       apiUrl += `?${state.pagination.startQueryKey}=${start}&${state.pagination.limitQueryKey}=${state.pagination.pageLength}`;
     }
+    //If sorting is enabled then set sort column and sort order in API URL
     if (isSortEnabled) {
       apiUrl += `&sort=${state.sortby}&order=${state.sort.sortOrder}`;
     }
-    let resp = await fetch(
-      apiUrl
-      // `${props.server.endpoint}?offset=${start}&limit=${state.pagination.pageLength}`
-      //&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder
-    );
+    //Fetch data using api
+    let resp = await fetch(apiUrl);
     let data = await resp.json();
-    let datatableData =
-      isServerSide && props.server.dataKey ? data[props.server.dataKey] : data;
+    let datatableData = isServerSide && dataKey ? data[dataKey] : data;
+    let totalRecords = data.length;
 
-    let totalRecords = 0;
-    if (props.server && props.server.totalRecordsKey) {
-      totalRecords = data[props.server.totalRecordsKey];
+    //If total records are also coming with same api URL result then read it using totalRecordsKey specified
+    if (totalRecordsKey) {
+      totalRecords = data[totalRecordsKey];
+    }
+    //Fetch Total number of records if enpoint url set for it.
+    if (props.server.countRecords && props.server.countRecords.endpoint) {
+      let countResp = await fetch(props.server.countRecords.endpoint);
+      let countData = await countResp.json();
+      if (totalRecordsKey) {
+        totalRecords = countData[totalRecordsKey];
+      } else {
+        totalRecords = countData;
+      }
     }
     return { data: datatableData, totalRecords };
   };
@@ -471,11 +383,8 @@ function DataTable(props) {
     let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
     if (isServerSide) {
       //Server side
-      // let pagedData = await fetchDataOnly(1);
       setData({
         ...state,
-        // data: pagedData,
-        // pagedData: pagedData,
         pagination: {
           ...state.pagination,
           pageLength: parseInt(pageLength, 10),
@@ -483,22 +392,15 @@ function DataTable(props) {
 
         currentPage: 1,
       });
-      // setData({
-      //   ...state,
-      //   currentPage: 1,
-      //   //pageLength: parseInt(pageLength, 10),
-      // });
-      // state.pagination.onPageLengthChange &&
-      //   state.pagination.onPageLengthChange(pageLength);
     } else {
       setData({
         ...state,
         // pageLength: parseInt(pageLength, 10),
         currentPage,
       });
-      // state.pagination.onPageLengthChange &&
-      //   state.pagination.onPageLengthChange(pageLength);
     }
+
+    props.onPageLengthChange && onPageLengthChange(pageLength);
   };
 
   const getPagedData = (pageNo, pageLength) => {
