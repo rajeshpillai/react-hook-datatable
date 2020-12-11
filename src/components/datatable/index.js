@@ -5,32 +5,41 @@ import "./datatable.css";
 import Pagination from "../pagination";
 
 function DataTable(props) {
+  const defaultPagination = {
+    enabled: false,
+    pageLength: 0,
+    type: "long",
+    startQueryKey: "offset",
+    limitQueryKey: "limit",
+  };
+  const defaultSort = { enabled: false };
+
   let isSortEnabled = (props.sort && props.sort.enabled) || false;
   let isEditable = props.edit || false;
-  let totalRecords = () => {
-    if (props.totalRecords) return props.totalRecords;
-    else if (props.data) {
+  let getTotalRecords = () => {
+    if (!props.serverSideDataLoad && props.data) {
       return props.data.length;
     }
     return 0;
   };
   let isPaginationEnabled =
     (props.pagination ? props.pagination.enabled : false) || false;
-  let pagination = isPaginationEnabled
-    ? props.pagination
-    : {
-        enabled: false,
-        pageLength: totalRecords(),
-        type: "long",
-      };
+
+  // let pagination = isPaginationEnabled
+  //   ? props.pagination
+  //   : {
+  //       enabled: false,
+  //       pageLength: state.totalRecords,
+  //       type: "long",
+  //     };
 
   // console.log("isPaginationEnabled", isPaginationEnabled);
   let isServerSide = props.serverSideDataLoad || false;
-  let sort = isSortEnabled
-    ? props.sort
-      ? props.sort
-      : { enabled: false }
-    : { enabled: false };
+  // let sort = isSortEnabled
+  //   ? props.sort
+  //     ? props.sort
+  //     : { enabled: false }
+  //   : { enabled: false };
   let keyField = props.keyField || "id";
   let noData = props.noData || "No records found!";
   let width = props.width || "100%";
@@ -41,64 +50,144 @@ function DataTable(props) {
       (isSortEnabled && props.sort
         ? props.sort.sortOrder.toLowerCase() == "desc"
         : false) || null,
-    data: props.data,
-    pagedData: props.data,
+    data: props.data || [],
+    pagedData: props.data || [],
     headers: props.headers,
-    // pageLength: props.pagination.pageLength || 5,
+    totalRecords: getTotalRecords(),
+    // pageLength: props.state.pagination.pageLength || 5,
     currentPage: 1,
+    pagination: isPaginationEnabled
+      ? { ...defaultPagination, ...props.pagination }
+      : defaultPagination,
+    sort: isSortEnabled
+      ? props.sort
+        ? { ...defaultSort, ...props.sort }
+        : defaultSort
+      : defaultSort,
   });
 
   // Update local state, when the parent changes the props of DataTable
-  useEffect(() => {
-    setData({
-      ...state,
-      data: props.data,
-      // pagination: props.pagination,
-      // pageLength: props.pagination.pageLength,
-    });
-  }, [props.data]);
+  // useEffect(() => {
+  //   setData({
+  //     ...state,
+  //     data: props.data,
+  //     // pagination: props.pagination,
+  //     // pageLength: props.state.pagination.pageLength,
+  //   });
+  // }, [props.data]);
 
-  // // Update local state, when the parent changes the props of DataTable
-  useEffect(() => {
-    setData({
-      ...state,
-      sortby: sort.sortCol || null,
-      descending:
-        (sort.sortOrder ? sort.sortOrder.toLowerCase() == "desc" : false) ||
-        null,
-    });
-  }, [sort.sortCol, sort.sortOrder]);
+  // Fetch data if server side enabled
+  // useEffect(() => {
+  //   if (isServerSide) {
+  //     fetchData(0, state.pageLength);
+  //   } else {
+  //     setData({
+  //       ...state,
+  //       data: props.data || [],
+  //     });
+  //   }
+
+  //   //endpoint
+  // }, []);
 
   // For pagnation to load data from serverside
-  useEffect(() => {
-    if (isPaginationEnabled) {
-      // onGotoPage(1);
-      setData({
-        ...state,
-        pagedData: isServerSide
-          ? state.data
-          : getPagedData(1, pagination.pageLength),
-      });
-    }
-  }, [state.data]);
+  // useEffect(() => {
+  //   if (isPaginationEnabled) {
+  //     // onGotoPage(1);
+  //     setData({
+  //       ...state,
+  //       pagedData: isServerSide
+  //         ? state.data
+  //         : getPagedData(1, state.pagination.pageLength),
+  //     });
+  //   }
+  // }, [state.data]);
 
   // For Sorting
   useEffect(() => {
-    onGotoPage(state.currentPage);
-  }, [state.descending, state.sortby]);
+    //
+    // if (isServerSide) {
+    //   fetchDataOnly(state.currentPage);
+    // } else {
+    //   onGotoPage(state.currentPage);
+    // }
+    // if (state.descending != null) {
+    onGotoPage(1);
+    // }
+  }, [state.sort.sortCol, state.sort.sortOrder, state.pagination.pageLength]);
 
   // For pagination
-  useEffect(() => {
-    // console.log("props", props);
+  // useEffect(() => {
+  //   onGotoPage(1);
+  //   // // console.log("props", props);
+  //   // if (isPaginationEnabled) {
+  //   //   if (isServerSide) {
+  //   //     //serverSide
+  //   //     fetchData();
+  //   //     // setData({
+  //   //     //   ...state,
+  //   //     //   data: pagedData,
+  //   //     //   pagedData: pagedData,
+  //   //     //   currentPage: 1,
+  //   //     // });
+  //   //   } else {
+  //   //     //NOT server side
+  //   //     onGotoPage(state.currentPage);
+  //   //   }
+  //   // }
+  // }, [state.pagination.pageLength]);
+
+  // // Update local state, when the parent changes the props of DataTable
+  // useEffect(() => {
+  //   setData({
+  //     ...state,
+  //     sortby: state.sort.sortCol || null,
+  //     descending:
+  //       (state.sort.sortOrder
+  //         ? state.sort.sortOrder.toLowerCase() == "desc"
+  //         : false) || null,
+  //   });
+  // }, [state.sort.sortCol, state.sort.sortOrder]);
+
+  // const fetchData = async (start, limit) => {
+  //   let result = await fetchDataOnly(1);
+  //   setData({
+  //     ...state,
+  //     data: result.data,
+  //     pagedData: result.data,
+  //     totalRecords: result.totalRecords,
+  //   });
+  // };
+
+  const fetchDataOnly = async (pageNo) => {
+    pageNo = parseInt(pageNo);
+    let start = state.pagination.pageLength * (pageNo - 1);
+
+    // let resp = await fetch(
+    //   `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder}`
+    // );
+    let apiUrl = `${props.server.endpoint}`;
     if (isPaginationEnabled) {
-      if (isServerSide) {
-        //serverSide
-      } else {
-        //NOT server side
-        onGotoPage(state.currentPage);
-      }
+      apiUrl += `?${state.pagination.startQueryKey}=${start}&${state.pagination.limitQueryKey}=${state.pagination.pageLength}`;
     }
-  }, [pagination.pageLength]);
+    if (isSortEnabled) {
+      apiUrl += `&sort=${state.sortby}&order=${state.sort.sortOrder}`;
+    }
+    let resp = await fetch(
+      apiUrl
+      // `${props.server.endpoint}?offset=${start}&limit=${state.pagination.pageLength}`
+      //&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder
+    );
+    let data = await resp.json();
+    let datatableData =
+      isServerSide && props.server.dataKey ? data[props.server.dataKey] : data;
+
+    let totalRecords = 0;
+    if (props.server && props.server.totalRecordsKey) {
+      totalRecords = data[props.server.totalRecordsKey];
+    }
+    return { data: datatableData, totalRecords };
+  };
 
   // Col drag and drop events
   const onDragStart = (e, srcIndex) => {
@@ -309,12 +398,18 @@ function DataTable(props) {
     let descending = !state.descending;
     if (isServerSide) {
       //Server side
-      sort.onSort && sort.onSort(colTitle, descending ? "desc" : "asc");
+      state.sort.onSort &&
+        state.sort.onSort(colTitle, descending ? "desc" : "asc");
       setData({
         ...state,
         descending,
         currentPage: 1,
         sortby: colTitle,
+        sort: {
+          ...state.sort,
+          sortCol: colTitle,
+          sortOrder: descending ? "desc" : "asc",
+        },
       });
     } else {
       let dataCopy = [...state.data];
@@ -342,7 +437,7 @@ function DataTable(props) {
         ...state,
         // sortby: colIndex,
         sortby: colTitle,
-        descending,
+        descending: descending,
         data: dataCopy,
         // pagedData: getPagedData(state.currentPage,state.pageLength),
         headers: [...state.headers],
@@ -371,34 +466,38 @@ function DataTable(props) {
   const onPageLengthChange = async (pageLength) => {
     pageLength = parseInt(pageLength, 10);
     let pages =
-      Math.ceil(totalRecords() / pageLength) ||
+      Math.ceil(state.totalRecords / pageLength) ||
       Math.ceil(state.data.length / pageLength);
     let currentPage = state.currentPage > pages - 1 ? 1 : state.currentPage;
     if (isServerSide) {
       //Server side
-      // let pagedData = await props.onChangePage(currentPage);
-      // setData({
-      //   ...state,
-      //   data: pagedData,
-      //   pagedData: pagedData,
-      //   pageLength: parseInt(pageLength, 10),
-      //   currentPage,
-      // });
+      // let pagedData = await fetchDataOnly(1);
       setData({
         ...state,
+        // data: pagedData,
+        // pagedData: pagedData,
+        pagination: {
+          ...state.pagination,
+          pageLength: parseInt(pageLength, 10),
+        },
+
         currentPage: 1,
-        //pageLength: parseInt(pageLength, 10),
       });
-      pagination.onPageLengthChange &&
-        pagination.onPageLengthChange(pageLength);
+      // setData({
+      //   ...state,
+      //   currentPage: 1,
+      //   //pageLength: parseInt(pageLength, 10),
+      // });
+      // state.pagination.onPageLengthChange &&
+      //   state.pagination.onPageLengthChange(pageLength);
     } else {
       setData({
         ...state,
         // pageLength: parseInt(pageLength, 10),
         currentPage,
       });
-      pagination.onPageLengthChange &&
-        pagination.onPageLengthChange(pageLength);
+      // state.pagination.onPageLengthChange &&
+      //   state.pagination.onPageLengthChange(pageLength);
     }
   };
 
@@ -415,17 +514,21 @@ function DataTable(props) {
   const onGotoPage = async (pageNo) => {
     if (isServerSide) {
       let pagedData = state.data;
-      if (pageNo != state.currentPage && pagination.onChangePage) {
-        pagedData = await pagination.onChangePage(pageNo);
-      }
+      // if (pageNo != state.currentPage) {
+      // pagedData = await state.pagination.onChangePage(pageNo);
+      pagedData = await fetchDataOnly(pageNo);
+      let totalRecords = pagedData.totalRecords;
+      pagedData = pagedData.data;
+      // }
       setData({
         ...state,
         pagedData: pagedData,
         data: pagedData,
         currentPage: pageNo,
+        totalRecords: totalRecords,
       });
     } else {
-      let pagedData = getPagedData(pageNo, pagination.pageLength);
+      let pagedData = getPagedData(pageNo, state.pagination.pageLength);
       setData({
         ...state,
         pagedData: pagedData,
@@ -444,10 +547,10 @@ function DataTable(props) {
     <div className={props.className}>
       {isPaginationEnabled && (
         <Pagination
-          type={pagination.type}
-          totalRecords={totalRecords()}
-          pageLength={pagination.pageLength}
-          onPageLengthChange={pagination.onPageLengthChange}
+          type={state.pagination.type}
+          totalRecords={state.totalRecords}
+          pageLength={state.pagination.pageLength}
+          onPageLengthChange={onPageLengthChange}
           onGotoPage={onGotoPage}
           currentPage={state.currentPage}
         >
@@ -455,6 +558,7 @@ function DataTable(props) {
         </Pagination>
       )}
       {renderTable()}
+      <div>Total Records: {state.totalRecords}</div>
       {isEditable && (
         <div>
           <input type="button" value="Submit" onClick={onSubmit} />

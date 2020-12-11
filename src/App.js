@@ -27,23 +27,12 @@ function App() {
         dataType: "string",
         controlType: "text",
       },
-      // {
-      //   title: "Completed",
-      //   accessor: "completed",
-      //   index: 3,
-      //   dataType: "boolean",
-      //   controlType: "select",
-      //   options: [
-      //     { text: "No", value: false },
-      //     { text: "Yes", value: true },
-      //   ],
-      // },
       {
         title: "Completed",
         accessor: "completed",
-        index: 5,
+        index: 3,
         dataType: "boolean",
-        controlType: "radio",
+        controlType: "select",
         options: [
           { text: "No", value: false },
           { text: "Yes", value: true },
@@ -52,7 +41,7 @@ function App() {
       {
         title: "Rating",
         accessor: "rating",
-        index: 6,
+        index: 5,
         width: "200px",
         cell: (row) => (
           <div className="rating">
@@ -83,7 +72,6 @@ function App() {
         title: "delectus aut autem",
         age: 29,
         qualification: "B.Com",
-        completed: true,
       },
       {
         userId: 1,
@@ -91,7 +79,7 @@ function App() {
         title: "quis ut nam facilis et officia qui",
         age: 29,
         qualification: "B.Com",
-        completed: true,
+        completed: false,
       },
       {
         userId: 1,
