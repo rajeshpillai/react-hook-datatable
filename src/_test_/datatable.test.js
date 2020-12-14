@@ -24,6 +24,161 @@ test("My First Test", () => {
   expect(true).toBeTruthy();
 });
 
+function getData(overrides) {
+  let state = {
+    headers: [
+      { title: "Id", accessor: "id", index: 1, dataType: "number" },
+      {
+        title: "Title",
+        accessor: "title",
+        width: "300px",
+        index: 2,
+        dataType: "string",
+      },
+      {
+        title: "Completed",
+        accessor: "completed",
+        index: 3,
+        dataType: "boolean",
+      },
+    ],
+    data: [
+      {
+        userId: 1,
+        id: 1,
+        title: "delectus aut autem",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 2,
+        title: "quis ut nam facilis et officia qui",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 3,
+        title: "fugiat veniam minus",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 4,
+        title: "et porro tempora",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 5,
+        title:
+          "laboriosam mollitia et enim quasi adipisci quia provident illum",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 6,
+        title: "qui ullam ratione quibusdam voluptatem quia omnis",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 7,
+        title: "illo expedita consequatur quia in",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 8,
+        title: "quo adipisci enim quam ut ab",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 9,
+        title: "molestiae perspiciatis ipsa",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 10,
+        title: "illo est ratione doloremque quia maiores aut",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 11,
+        title: "vero rerum temporibus dolor",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 12,
+        title: "ipsa repellendus fugit nisi",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 13,
+        title: "et doloremque nulla",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 14,
+        title: "repellendus sunt dolores architecto voluptatum",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 15,
+        title: "ab voluptatum amet voluptas",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 16,
+        title: "accusamus eos facilis sint et aut voluptatem",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 17,
+        title: "quo laboriosam deleniti aut qui",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 18,
+        title: "dolorum est consequatur ea mollitia in culpa",
+        completed: false,
+      },
+      {
+        userId: 1,
+        id: 19,
+        title: "molestiae ipsa aut voluptatibus pariatur dolor nihil",
+        completed: true,
+      },
+      {
+        userId: 1,
+        id: 20,
+        title: "ullam nobis libero sapiente ad optio sint",
+        completed: true,
+      },
+    ],
+    ...overrides,
+  };
+
+  return state;
+}
+
+const onPageLengthChange = jest.fn();
+//Set Pagination
+let pagination = {
+  enabled: true,
+  pageLength: 10, //for server side keep in state
+  type: "long", // long, short
+};
+
 test("When no Records then show no records found", () => {
   const { container, debug } = render(
     <DataTable headers={[]} data={[]}></DataTable>
@@ -33,39 +188,17 @@ test("When no Records then show no records found", () => {
 });
 
 test("Data table rendered with stubbed data ", () => {
+  let state = getData();
   const { container, debug } = render(
     <DataTable
-      headers={[]}
-      data={[
-        {
-          userId: 1,
-          id: 17,
-          title: "quo laboriosam deleniti aut qui",
-          completed: true,
-        },
-        {
-          userId: 1,
-          id: 18,
-          title: "dolorum est consequatur ea mollitia in culpa",
-          completed: false,
-        },
-        {
-          userId: 1,
-          id: 19,
-          title: "molestiae ipsa aut voluptatibus pariatur dolor nihil",
-          completed: true,
-        },
-        {
-          userId: 1,
-          id: 20,
-          title: "ullam nobis libero sapiente ad optio sint",
-          completed: true,
-        },
-      ]}
+      serverSideDataLoad={false}
+      headers={state.headers}
+      data={state.data}
     ></DataTable>
   );
-  const noDatatr = container.querySelectorAll(".datatable-row");
-  expect(noDatatr.length).toBe(4);
+  // debug();
+  const tableRows = container.querySelectorAll(".datatable-row");
+  expect(tableRows.length).toBe(10);
 });
 
 test("Ability to provide custom render function for column", () => {
@@ -130,160 +263,14 @@ test("Ability to provide custom render function for column", () => {
   expect(noDatatr.length).toBe(2);
 });
 
-let headers = [
-  { title: "Id", accessor: "id", index: 1, dataType: "number" },
-  {
-    title: "Title",
-    accessor: "title",
-    width: "300px",
-    index: 2,
-    dataType: "string",
-  },
-  {
-    title: "Completed",
-    accessor: "completed",
-    index: 3,
-    dataType: "boolean",
-  },
-];
-let data = [
-  {
-    userId: 1,
-    id: 1,
-    title: "delectus aut autem",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 2,
-    title: "quis ut nam facilis et officia qui",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 3,
-    title: "fugiat veniam minus",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 4,
-    title: "et porro tempora",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 5,
-    title: "laboriosam mollitia et enim quasi adipisci quia provident illum",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 6,
-    title: "qui ullam ratione quibusdam voluptatem quia omnis",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 7,
-    title: "illo expedita consequatur quia in",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 8,
-    title: "quo adipisci enim quam ut ab",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 9,
-    title: "molestiae perspiciatis ipsa",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 10,
-    title: "illo est ratione doloremque quia maiores aut",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 11,
-    title: "vero rerum temporibus dolor",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 12,
-    title: "ipsa repellendus fugit nisi",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 13,
-    title: "et doloremque nulla",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 14,
-    title: "repellendus sunt dolores architecto voluptatum",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 15,
-    title: "ab voluptatum amet voluptas",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 16,
-    title: "accusamus eos facilis sint et aut voluptatem",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 17,
-    title: "quo laboriosam deleniti aut qui",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 18,
-    title: "dolorum est consequatur ea mollitia in culpa",
-    completed: false,
-  },
-  {
-    userId: 1,
-    id: 19,
-    title: "molestiae ipsa aut voluptatibus pariatur dolor nihil",
-    completed: true,
-  },
-  {
-    userId: 1,
-    id: 20,
-    title: "ullam nobis libero sapiente ad optio sint",
-    completed: true,
-  },
-];
-const onPageLengthChange = jest.fn();
-//Set Pagination
-let pagination = {
-  enabled: true,
-  pageLength: 10, //for server side keep in state
-  type: "long", // long, short
-  onPageLengthChange: onPageLengthChange,
-};
-
 test("Pagination component rendered when data at client side", () => {
+  let state = getData({ pagination: pagination });
   //Render Datatable
   const { container, debug } = render(
     <DataTable
-      headers={headers}
-      data={data}
-      pagination={pagination}
+      headers={state.headers}
+      data={state.data}
+      pagination={state.pagination}
       serverSideDataLoad={false}
     ></DataTable>
   );
@@ -299,38 +286,44 @@ test("Pagination component rendered when data at client side", () => {
 });
 
 test("Pagination on click of next button and page button state gets updated", () => {
+  let state = getData({
+    pagination: pagination,
+  });
   //Render Datatable
-  const {container, getBy} = render(
+  const { container, getBy } = render(
     <DataTable
-      headers={headers}
-      data={data}
-      pagination={pagination}
+      headers={state.headers}
+      data={state.data}
+      pagination={state.pagination}
       serverSideDataLoad={false}
     ></DataTable>
   );
   const setData = jest.fn();
   const handleClick = jest.spyOn(React, "useState");
   handleClick.mockImplementation((state) => [state, setData]);
-  
+
   //wrapper.find(".pagination-btn.next").simulate("click");
-  fireEvent.click(container.querySelector('.pagination-btn.next'));
+  fireEvent.click(container.querySelector(".pagination-btn.next"));
   expect(setData).toBeTruthy();
 
   //btn-2
   //wrapper.find("#btn-2").simulate("click");
-  fireEvent.click(container.querySelector('#btn-2'));
+  fireEvent.click(container.querySelector("#btn-2"));
   expect(setData).toBeTruthy();
 });
 
-
 test("Pagination on change page length props.onPageLengthChange is called", () => {
+  let state = getData({
+    pagination: pagination,
+  });
   //Render Datatable
   const { container } = render(
     <DataTable
-      headers={headers}
-      data={data}
-      pagination={pagination}
+      headers={state.headers}
+      data={state.data}
+      pagination={state.pagination}
       serverSideDataLoad={false}
+      onPageLengthChange={onPageLengthChange}
     ></DataTable>
   );
 

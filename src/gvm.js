@@ -44,7 +44,39 @@ function Gvm() {
       sortCol: "title",
       sortOrder: "Asc",
     },
-    data: [],
+    // data: [],
+    data: [
+      {
+        id: 1,
+        name: "a",
+        age: 29,
+        qualification: "B.Com",
+        rating: 3,
+        gender: "male",
+        city: "Kerala",
+        skills: ["reactjs", "angular", "vuejs"],
+      },
+      {
+        id: 2,
+        name: "b",
+        age: 35,
+        qualification: "B.Sc",
+        rating: 5,
+        gender: "female",
+        city: "Mumbai",
+        skills: ["reactjs", "angular"],
+      },
+      {
+        id: 3,
+        name: "c",
+        age: 42,
+        qualification: "B.E",
+        rating: 3,
+        gender: "female",
+        city: "Bangalore",
+        skills: ["reactjs"],
+      },
+    ],
     totalRecords: 0,
   };
   const DEFAULT_DATA = {
@@ -113,11 +145,11 @@ function Gvm() {
   };
 
   // // For pagination
-  useEffect(() => {
-    //if (pagination.enabled && !props.pagination.serverSide) {
-    fetchData();
-    //}
-  }, [state.pageLength, state.sort]);
+  // useEffect(() => {
+  //   //if (pagination.enabled && !props.pagination.serverSide) {
+  //   fetchData();
+  //   //}
+  // }, [state.pageLength, state.sort]);
 
   const onPageLengthChange = (pageLength) => {
     setState({
@@ -222,40 +254,81 @@ function Gvm() {
         }}
       />
       <DataTable
-        className="data-table"
-        title="USER PROFILES"
-        keyField="id"
-        edit={false}
-        serverSideDataLoad={true}
-        server={{
-          data: {
-            endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-            dataKey: "articles",
-            totalRecordsKey: "articles_count",
+        serverSideDataLoad={false}
+        headers={[
+          {
+            title: "Id",
+            accessor: "id",
+            index: 1,
+            dataType: "number",
           },
-          // countRecords: {
-          //   endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-          //   totalRecordsKey: "articles",
-          // },
-        }}
-        pagination={{
-          enabled: true,
-          pageLength: state.pageLength, //for server side keep in state
-          type: "long", // long, short
-          // onChangePage: fetchDataOnly,
-          startQueryKey: "offset",
-          limitQueryKey: "limit",
-        }}
-        sort={{
-          enabled: true,
-          sortCol: state.sort.sortCol,
-          sortOrder: state.sort.sortOrder,
-        }}
-        width="100%"
-        headers={state.headers}
+          {
+            title: "Title",
+            accessor: "title",
+            index: 2,
+            dataType: "string",
+          },
+        ]}
+        data={[
+          {
+            userId: 1,
+            id: 17,
+            title: "quo laboriosam deleniti aut qui",
+            completed: true,
+          },
+          {
+            userId: 1,
+            id: 18,
+            title: "dolorum est consequatur ea mollitia in culpa",
+            completed: false,
+          },
+          {
+            userId: 1,
+            id: 19,
+            title: "molestiae ipsa aut voluptatibus pariatur dolor nihil",
+            completed: true,
+          },
+          {
+            userId: 1,
+            id: 20,
+            title: "ullam nobis libero sapiente ad optio sint",
+            completed: true,
+          },
+        ]}
+        // className="data-table"
+        // title="USER PROFILES"
+        // keyField="id"
+        // edit={false}
+        // serverSideDataLoad={false}
+        // server={{
+        //   data: {
+        //     endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+        //     dataKey: "articles",
+        //     totalRecordsKey: "articles_count",
+        //   },
+        //   // countRecords: {
+        //   //   endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+        //   //   totalRecordsKey: "articles",
+        //   // },
+        // }}
+        // pagination={{
+        //   enabled: true,
+        //   pageLength: state.pageLength, //for server side keep in state
+        //   type: "long", // long, short
+        //   // onChangePage: fetchDataOnly,
+        //   startQueryKey: "offset",
+        //   limitQueryKey: "limit",
+        // }}
+        // sort={{
+        //   enabled: true,
+        //   sortCol: state.sort.sortCol,
+        //   sortOrder: state.sort.sortOrder,
+        // }}
+        // width="100%"
+        // headers={state.headers}
         // data={state.data}
-        noData="No records!"
-        onUpdateData={onUpdateData}
+        // noData="No records!"
+        // onUpdateData={onUpdateData}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import Pagination from "../pagination";
 function DataTable(props) {
   const defaultPagination = {
     enabled: false,
-    pageLength: 0,
+    pageLength: 10,
     type: "long",
     startQueryKey: "offset",
     limitQueryKey: "limit",
@@ -52,53 +52,63 @@ function DataTable(props) {
       : defaultSort,
   });
 
+  useEffect(() => {
+    setData({
+      ...state,
+      data: props.data || [],
+      pagedData: props.data || [],
+    });
+  }, [props.data]);
+
   // For first time load, pagination and Sorting
   useEffect(() => {
     onGotoPage(1);
   }, [state.sort.sortCol, state.sort.sortOrder, state.pagination.pageLength]);
 
   const fetchDataOnly = async (pageNo) => {
-    pageNo = parseInt(pageNo);
-    let start = state.pagination.pageLength * (pageNo - 1);
-    if (!props.server || (props.server && !props.server.data)) {
-      throw new Error("Please provide Server side api url for data");
-    }
-    // let resp = await fetch(
-    //   `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder}`
-    // );
-    let apiUrl = `${props.server.data.endpoint}`;
-    let dataKey = props.server.data.dataKey;
-    let totalRecordsKey = props.server.data.totalRecordsKey;
-
-    //If pagination enabled then set start and limit in API URL
-    if (isPaginationEnabled) {
-      apiUrl += `?${state.pagination.startQueryKey}=${start}&${state.pagination.limitQueryKey}=${state.pagination.pageLength}`;
-    }
-    //If sorting is enabled then set sort column and sort order in API URL
-    if (isSortEnabled) {
-      apiUrl += `&sort=${state.sortby}&order=${state.sort.sortOrder}`;
-    }
-    //Fetch data using api
-    let resp = await fetch(apiUrl);
-    let data = await resp.json();
-    let datatableData = isServerSide && dataKey ? data[dataKey] : data;
-    let totalRecords = data.length;
-
-    //If total records are also coming with same api URL result then read it using totalRecordsKey specified
-    if (totalRecordsKey) {
-      totalRecords = data[totalRecordsKey];
-    }
-    //Fetch Total number of records if enpoint url set for it.
-    if (props.server.countRecords && props.server.countRecords.endpoint) {
-      let countResp = await fetch(props.server.countRecords.endpoint);
-      let countData = await countResp.json();
-      if (totalRecordsKey) {
-        totalRecords = countData[totalRecordsKey];
-      } else {
-        totalRecords = countData;
+    if (isServerSide) {
+      pageNo = parseInt(pageNo);
+      let start = state.pagination.pageLength * (pageNo - 1);
+      if (!props.server || (props.server && !props.server.data)) {
+        throw new Error("Please provide Server side api url for data");
       }
+      // let resp = await fetch(
+      //   `https://jsonplaceholder.typicode.com/todos?_start=${start}&_limit=${state.pageLength}&_sort=${state.sort.sortCol}&_order=${state.sort.sortOrder}`
+      // );
+      let apiUrl = `${props.server.data.endpoint}`;
+      let dataKey = props.server.data.dataKey;
+      let totalRecordsKey = props.server.data.totalRecordsKey;
+
+      //If pagination enabled then set start and limit in API URL
+      if (isPaginationEnabled) {
+        apiUrl += `?${state.pagination.startQueryKey}=${start}&${state.pagination.limitQueryKey}=${state.pagination.pageLength}`;
+      }
+      //If sorting is enabled then set sort column and sort order in API URL
+      if (isSortEnabled) {
+        apiUrl += `&sort=${state.sortby}&order=${state.sort.sortOrder}`;
+      }
+      //Fetch data using api
+      let resp = await fetch(apiUrl);
+      let data = await resp.json();
+      let datatableData = isServerSide && dataKey ? data[dataKey] : data;
+      let totalRecords = data.length;
+
+      //If total records are also coming with same api URL result then read it using totalRecordsKey specified
+      if (totalRecordsKey) {
+        totalRecords = data[totalRecordsKey];
+      }
+      //Fetch Total number of records if enpoint url set for it.
+      if (props.server.countRecords && props.server.countRecords.endpoint) {
+        let countResp = await fetch(props.server.countRecords.endpoint);
+        let countData = await countResp.json();
+        if (totalRecordsKey) {
+          totalRecords = countData[totalRecordsKey];
+        } else {
+          totalRecords = countData;
+        }
+      }
+      return { data: datatableData, totalRecords };
     }
-    return { data: datatableData, totalRecords };
   };
 
   // Col drag and drop events
@@ -400,7 +410,7 @@ function DataTable(props) {
       });
     }
 
-    props.onPageLengthChange && onPageLengthChange(pageLength);
+    props.onPageLengthChange && props.onPageLengthChange(pageLength);
   };
 
   const getPagedData = (pageNo, pageLength) => {
