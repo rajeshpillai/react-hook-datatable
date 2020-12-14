@@ -253,6 +253,48 @@ function Gvm() {
           onSubmit(model);
         }}
       />
+      {/* serverside */}
+      <DataTable
+        serverSideDataLoad={true}
+        // headers={state.headers}
+        data={[]}
+        className="data-table"
+        title="USER PROFILES"
+        keyField="id"
+        edit={false}
+        serverSideDataLoad={true}
+        server={{
+          data: {
+            endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+            dataKey: "articles",
+            totalRecordsKey: "articles_count",
+          },
+          // countRecords: {
+          //   endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
+          //   totalRecordsKey: "articles",
+          // },
+        }}
+        maxHeight={"300px"}
+        pagination={{
+          enabled: true,
+          pageLength: 15, //state.pageLength, //for server side keep in state
+          type: "long", // long, short
+          // onChangePage: fetchDataOnly,
+          startQueryKey: "offset",
+          limitQueryKey: "limit",
+        }}
+        sort={{
+          enabled: true,
+          sortCol: state.sort.sortCol,
+          sortOrder: state.sort.sortOrder,
+        }}
+        width="100%"
+        headers={state.headers}
+        data={state.data}
+        noData="No records!"
+        onUpdateData={onUpdateData}
+      />
+      {/* Hardcoded data */}
       <DataTable
         serverSideDataLoad={false}
         headers={[
@@ -295,40 +337,6 @@ function Gvm() {
             completed: true,
           },
         ]}
-        // className="data-table"
-        // title="USER PROFILES"
-        // keyField="id"
-        // edit={false}
-        // serverSideDataLoad={false}
-        // server={{
-        //   data: {
-        //     endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-        //     dataKey: "articles",
-        //     totalRecordsKey: "articles_count",
-        //   },
-        //   // countRecords: {
-        //   //   endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-        //   //   totalRecordsKey: "articles",
-        //   // },
-        // }}
-        // pagination={{
-        //   enabled: true,
-        //   pageLength: state.pageLength, //for server side keep in state
-        //   type: "long", // long, short
-        //   // onChangePage: fetchDataOnly,
-        //   startQueryKey: "offset",
-        //   limitQueryKey: "limit",
-        // }}
-        // sort={{
-        //   enabled: true,
-        //   sortCol: state.sort.sortCol,
-        //   sortOrder: state.sort.sortOrder,
-        // }}
-        // width="100%"
-        // headers={state.headers}
-        // data={state.data}
-        // noData="No records!"
-        // onUpdateData={onUpdateData}
       />
     </div>
   );

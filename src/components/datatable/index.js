@@ -289,7 +289,12 @@ function DataTable(props) {
           }
         }
         return (
-          <td key={index} data-id={id} data-row={rowIdx}>
+          <td
+            key={index}
+            data-id={id}
+            data-row={rowIdx}
+            className={`${header.dataType}`}
+          >
             {getCellContent(header, content, rowIdx, index)}
           </td>
         );
@@ -375,13 +380,21 @@ function DataTable(props) {
       state.pagedData.length > 0 ? renderContent() : renderNoData();
 
     return (
-      <table className="data-inner-table">
-        <caption className="data-table-caption">{title}</caption>
-        <thead onClick={onSort}>
-          <tr>{headerView}</tr>
-        </thead>
-        <tbody>{contentView}</tbody>
-      </table>
+      <React.Fragment>
+        <div className="data-table-caption">{title}</div>
+        <div
+          className="table-wrapper"
+          style={{ maxHeight: props.maxHeight || "265px" }}
+        >
+          <table className="data-inner-table">
+            {/* <caption className="data-table-caption">{title}</caption> */}
+            <thead onClick={onSort} className="sticky">
+              <tr>{headerView}</tr>
+            </thead>
+            <tbody>{contentView}</tbody>
+          </table>
+        </div>
+      </React.Fragment>
     );
   };
 
