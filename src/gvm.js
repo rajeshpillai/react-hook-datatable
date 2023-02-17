@@ -257,16 +257,14 @@ function Gvm() {
       <DataTable
         serverSideDataLoad={true}
         // headers={state.headers}
-        data={[]}
         className="data-table"
         title="USER PROFILES"
         keyField="id"
         edit={false}
-        serverSideDataLoad={true}
         server={{
           data: {
-            endpoint: "https://algo-blog-api.herokuapp.com/api/articles",
-            dataKey: "articles",
+            endpoint: "https://jsonplaceholder.typicode.com/posts",
+            dataKey: "",
             totalRecordsKey: "articles_count",
           },
           // countRecords: {
